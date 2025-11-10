@@ -94,8 +94,12 @@ func main() {
 		http.NotFound(w, r)
 	})
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	srv := &http.Server{
-		Addr:              ":8080",
+		Addr:              ":" + port,
 		Handler:           logRequests(mux),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
