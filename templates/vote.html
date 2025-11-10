@@ -1,0 +1,31 @@
+{{ define "vote_content" }}
+  <h2 class="section-title center">Выбери кандидата</h2>
+
+  <div class="main-cats">
+    {{ range .Categories }}
+      {{ if or (eq .ID "active-year") (eq .ID "inactive-year") }}
+      <button class="main-btn" type="button" data-category="{{ .ID }}">{{ .Title }}</button>
+      {{ end }}
+    {{ end }}
+  </div>
+
+  <h3 class="section-title center" style="margin-top:32px;">Другие номинации</h3>
+
+  <div class="grid small-cats">
+    {{ range .Categories }}
+      {{ if and (ne .ID "active-year") (ne .ID "inactive-year") }}
+      <button class="cat-btn" type="button" data-category="{{ .ID }}">{{ .Title }}</button>
+      {{ end }}
+    {{ end }}
+  </div>
+
+  <!-- модальне вікно -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="close-modal">×</button>
+      <h3 id="modal-title"></h3>
+      <div id="modal-nominees" class="nominees-grid"></div>
+    </div>
+  </div>
+{{ end }}

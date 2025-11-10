@@ -1,0 +1,59 @@
+{
+  "categories": [
+    {
+      "id": "active-year",
+      "title": "Актив Года",
+      "nominees": [
+        { "id": "user1", "name": "Дима",    "image": "/static/img/candidates/dima.jpg" },
+        { "id": "user2", "name": "Настя",   "image": "/static/img/candidates/dima.jpg" },
+        { "id": "user3", "name": "Никита",  "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+    {
+      "id": "inactive-year",
+      "title": "Неактив Года",
+      "nominees": [
+        { "id": "user4", "name": "Дима",   "image": "/static/img/candidates/dima.jpg" },
+        { "id": "user5", "name": "Маша",    "image": "/static/img/candidates/dima.jpg" },
+        { "id": "user6", "name": "Мацони",    "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+
+    { "id": "meme-of-the-year",
+      "title": "Мем Года",
+      "nominees": [
+        { "id": "meme1", "name": "бихбоп", "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme2", "name": "53",  "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+    { "id": "conflict-of-the-year",
+      "title": "Конфликт Года",
+      "nominees": [
+        { "id": "conf1", "name": "Срач #1", "image": "/static/img/candidates/dima.jpg" },
+        { "id": "conf2", "name": "Срач #2", "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+    { "id": "gif-of-the-year",
+      "title": "GIF Года",
+      "nominees": [
+        { "id": "gif1", "name": "мшк фреде", "image": "/static/img/candidates/dima.jpg" },
+        { "id": "gif2", "name": "Дуля",      "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+    { "id": "avatar-of-the-year",
+      "title": "Ава Года",
+      "nominees": [
+        { "id": "ava1", "name": "AVA #1", "image": "/static/img/candidates/dima.jpg" },
+        { "id": "ava2", "name": "AVA #2", "image": "/static/img/candidates/dima.jpg" }
+      ]
+    },
+    { "id": "song-of-the-year",
+      "title": "Трек Года",
+      "nominees": [
+        { "id": "track1", "name": "Вруби монетизацию", "audio": "/static/media/calm.mp3" },
+        { "id": "track2", "name": "Квартет Хит",       "audio": "/static/media/ending.mp3" },
+        { "id": "track3", "name": "Трио Хит",          "audio": "/static/media/tense.mp3" }
+      ]
+    }
+  ]
+}

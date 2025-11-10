@@ -1,0 +1,19 @@
+{{ define "results_content" }}
+  <h2 class="section-title">Текущие результаты</h2>
+  <div class="grid">
+    {{ range .Results }}
+      <div class="card">
+        <h3 class="card-title">{{ .Title }}</h3>
+        <ul class="results">
+          {{ range .Nominees }}
+            <li class="result-row">
+              <span class="nominee-name">{{ .Name }}</span>
+              <span class="count">{{ .Votes }}</span>
+            </li>
+          {{ end }}
+        </ul>
+      </div>
+    {{ end }}
+  </div>
+{{ end }}
+

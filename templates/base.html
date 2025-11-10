@@ -1,0 +1,47 @@
+{{ define "base.html" -}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anteiku Awards 2025 🏆</title>
+  <meta name="theme-color" content="#0b0b0d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="bg-orbs"></div>
+  <canvas id="snow" class="snow-canvas" aria-hidden="true"></canvas>
+
+  <div class="page">
+    <header class="header glass">
+      <a href="/" class="brand gradient-text">Anteiku Awards 2025 🏆</a>
+      <nav class="nav">
+        <a class="nav-link" href="/vote">Голосование</a>
+        <a class="nav-link" href="/results">Результаты</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      {{ if eq .Page "index_content" }}
+        {{ template "index_content" . }}
+      {{ else if eq .Page "vote_content" }}
+        {{ template "vote_content" . }}
+      {{ else if eq .Page "results_content" }}
+        {{ template "results_content" . }}
+      {{ end }}
+    </main>
+
+    <footer class="footer glass">Made by vethre 🍵</footer>
+    <button id="mute-toggle" class="mute-btn">🔈</button>
+
+  </div>
+
+  <script src="/static/js/app.js?v=2" defer></script>
+  <audio id="bg-music" src="/static/audio/JingleBellRock.mp3" loop preload="auto"></audio>
+  <script src="/static/js/music.js"></script>
+
+</body>
+</html>
+{{- end }}
