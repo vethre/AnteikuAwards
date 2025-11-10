@@ -35,6 +35,8 @@ type Nominee struct {
 type Category struct {
 	ID       string    `json:"id"`
 	Title    string    `json:"title"`
+	Locked   bool      `json:"locked,omitempty"` // <-- додаємо
+	Cover    string    `json:"cover,omitempty"`  // <-- додаємо
 	Nominees []Nominee `json:"nominees"`
 }
 

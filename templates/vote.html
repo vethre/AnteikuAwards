@@ -1,15 +1,20 @@
 {{ define "vote_content" }}
   <h2 class="section-title center">Выбери кандидата</h2>
 
-  <div class="main-cats">
+  <!-- Locked-картки замість кнопок -->
+  <div class="locked-cats">
     {{ range .Categories }}
       {{ if or (eq .ID "active-year") (eq .ID "inactive-year") }}
-      <button class="main-btn" type="button" data-category="{{ .ID }}">{{ .Title }}</button>
+      <div class="locked-card">
+        <img src="{{ .Cover }}" alt="{{ .Title }}" />
+        <div class="locked-title">{{ .Title }}</div>
+        <div class="locked-sub">Итоги будут объявлены позже</div>
+      </div>
       {{ end }}
     {{ end }}
   </div>
 
-  <h3 class="section-title center" style="margin-top:32px;">Другие номинации</h3>
+  <h3 class="section-title center" style="margin-top:24px;">Другие номинации</h3>
 
   <div class="grid small-cats">
     {{ range .Categories }}
@@ -27,16 +32,5 @@
       <h3 id="modal-title"></h3>
       <div id="modal-nominees" class="nominees-grid"></div>
     </div>
-  </div>
-
-  <div class="tg-login">
-    <script async src="https://telegram.org/js/telegram-widget.js?22"
-            data-telegram-login="anteikuawards_bot" 
-            data-size="large"
-            data-radius="14"
-            data-userpic="false"
-            data-request-access="write"
-            data-lang="ru"
-            data-auth-url="/tg-auth"></script>
   </div>
 {{ end }}

@@ -394,6 +394,19 @@ body::before{
 }
 .mute-btn:hover{opacity:.8;}
 
+.locked-cats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px; max-width:620px; margin:0 auto 28px;
+}
+.locked-card{
+  background:#1b1b25;border:1px solid #2b2b3b;border-radius:14px;
+  padding:14px;text-align:center;opacity:.85;
+}
+.locked-card img{width:100%;border-radius:10px;margin-bottom:10px}
+.locked-title{font-weight:700;color:var(--gold);margin-bottom:6px}
+.locked-sub{color:#a9a9b6;font-size:14px}
+
 .tg-login{
   display:flex;
   justify-content:center;
@@ -408,3 +421,9 @@ body::before{
 /* Підрівняємо “Другие номинации” */
 .small-cats { max-width: 780px; gap: 12px; }
 .cat-btn { padding: 12px 14px; border-radius: 12px; } 
+
+.header{gap:12px}
+.auth-slot{display:flex;align-items:center;justify-content:center; min-width:180px}
+@media (max-width:720px){
+  .auth-slot{transform:scale(.92); transform-origin:right center;}
+}
