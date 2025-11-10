@@ -2,19 +2,27 @@ package main
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"slices"
+	"sort"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type Nominee struct {
@@ -39,6 +47,8 @@ var (
 	votesMu sync.RWMutex
 	votes   = map[string]map[string]int{}
 )
+
+var db *sql.DB
 
 var allCategories Categories
 
@@ -93,6 +103,45 @@ func main() {
 		}
 		http.NotFound(w, r)
 	})
+	mux.HandleFunc("/api/prefs/music", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			getMusicPref(w, r)
+			return
+		}
+		if r.Method == http.MethodPost {
+			setMusicPref(w, r)
+			return
+		}
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	})
+	mux.HandleFunc("/tg-auth", tgAuthHandler)
+
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("DATABASE_URL is empty")
+	}
+	var err error
+	db, err = sql.Open("pgx", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS votes (
+	id bigserial PRIMARY KEY,
+	user_key text NOT NULL,
+	category_id text NOT NULL,
+	nominee_id text NOT NULL,
+	ts timestamptz NOT NULL DEFAULT now(),
+	UNIQUE (user_key, category_id)
+	)`)
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS user_prefs (
+	user_key text PRIMARY KEY,
+	music_on boolean NOT NULL DEFAULT true,
+	updated_at timestamptz NOT NULL DEFAULT now()
+	)`)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -120,6 +169,69 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("server error: %v", err)
 	}
+}
+
+func verifyTelegramAuth(values url.Values, botToken string) (map[string]string, bool) {
+	data := make(map[string]string)
+	for k := range values {
+		if k == "hash" {
+			continue
+		}
+		data[k] = values.Get(k)
+	}
+	// строим data_check_string
+	keys := make([]string, 0, len(data))
+	for k := range data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var b strings.Builder
+	for i, k := range keys {
+		if i > 0 {
+			b.WriteByte('\n')
+		}
+		b.WriteString(k)
+		b.WriteByte('=')
+		b.WriteString(data[k])
+	}
+	secret := sha256.Sum256([]byte(botToken))
+	mac := hmac.New(sha256.New, secret[:])
+	mac.Write([]byte(b.String()))
+	check := hex.EncodeToString(mac.Sum(nil))
+	return data, strings.EqualFold(check, values.Get("hash"))
+}
+
+func tgAuthHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	data, ok := verifyTelegramAuth(r.Form, os.Getenv("TG_BOT_TOKEN"))
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	tgID := data["id"]
+	// Переприв’язуємо user_key до Telegram
+	http.SetCookie(w, &http.Cookie{
+		Name: "av_uid", Value: "tg_" + tgID, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode, MaxAge: 60 * 60 * 24 * 365,
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func getOrSetUserKey(w http.ResponseWriter, r *http.Request) string {
+	if c, err := r.Cookie("av_uid"); err == nil && c.Value != "" {
+		return c.Value
+	}
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	uid := "anon_" + hex.EncodeToString(b)
+	http.SetCookie(w, &http.Cookie{
+		Name: "av_uid", Value: uid, Path: "/",
+		HttpOnly: true, SameSite: http.SameSiteLaxMode, MaxAge: 60 * 60 * 24 * 365,
+	})
+	return uid
 }
 
 func logRequests(next http.Handler) http.Handler {
@@ -222,6 +334,35 @@ type voteRequest struct {
 	NomineeID  string `json:"nomineeId"`
 }
 
+func getMusicPref(w http.ResponseWriter, r *http.Request) {
+	userKey := getOrSetUserKey(w, r)
+	var on sql.NullBool
+	_ = db.QueryRow(`SELECT music_on FROM user_prefs WHERE user_key=$1`, userKey).Scan(&on)
+	val := true
+	if on.Valid {
+		val = on.Bool
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"musicOn": val})
+}
+
+func setMusicPref(w http.ResponseWriter, r *http.Request) {
+	userKey := getOrSetUserKey(w, r)
+	var body struct {
+		On bool `json:"on"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	_, _ = db.Exec(`
+    INSERT INTO user_prefs(user_key, music_on) VALUES ($1,$2)
+    ON CONFLICT (user_key) DO UPDATE SET music_on=EXCLUDED.music_on, updated_at=now()
+  `, userKey, body.On)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"ok": true})
+}
+
 func voteAPIHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -242,30 +383,20 @@ func voteAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check cookie for per-category vote prevention
-	votedCats := parseVotedCookie(r)
-	if slices.Contains(votedCats, req.CategoryID) {
-		http.Error(w, "already voted for this category", http.StatusForbidden)
+	userKey := getOrSetUserKey(w, r)
+
+	// заборона повторного голосу на уровне БД (UNIQUE)
+	_, err := db.Exec(`INSERT INTO votes(user_key, category_id, nominee_id) VALUES ($1,$2,$3)`,
+		userKey, req.CategoryID, req.NomineeID)
+	if err != nil {
+		http.Error(w, "уже проголосовано", http.StatusForbidden)
 		return
 	}
 
-	// Record vote
+	// (не обязательно, но если хочешь — можешь продолжать вести in-memory счётчик)
 	votesMu.Lock()
-	if _, ok := votes[req.CategoryID]; !ok {
-		votes[req.CategoryID] = map[string]int{}
-	}
 	votes[req.CategoryID][req.NomineeID]++
 	votesMu.Unlock()
-
-	// Update cookie: add category to voted list
-	votedCats = append(votedCats, req.CategoryID)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "av_voted",
-		Value:    strings.Join(votedCats, ","),
-		Path:     "/",
-		HttpOnly: false,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   60 * 60 * 24 * 365, // 1 year
-	})
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})

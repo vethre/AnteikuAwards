@@ -35,19 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       modalTitle.textContent = data.title;
-      modalNominees.innerHTML = data.nominees.map(n => `
-        <article class="nominee-card">
-          ${n.audio
+
+      if (data.locked) {
+        modalNominees.innerHTML = `
+          <article class="nominee-card">
+            <img src="${data.cover || '/static/img/unknown.png'}" alt="Скоро" />
+            <div class="info">
+              <div class="nominee-name">Итоги будут объявлены позже</div>
+            </div>
+          </article>
+        `;
+      } else {
+        modalNominees.innerHTML = data.nominees.map(n => {
+          const isVideo = n.image && n.image.endsWith('.mp4');
+          const media = n.audio
             ? `<audio controls preload="none" src="${n.audio}"></audio>`
-            : n.image.endsWith(".mp4")
-              ? `<video controls preload="metadata" src="${n.image}" style="width:100%;border-radius:10px"></video>`
-              : `<img src="${n.image}" alt="${n.name}">`}
-          <div class="info">
-            <div class="nominee-name">${n.name}</div>
-            <button class="btn btn-vote" data-category="${data.id}" data-nominee="${n.id}">Проголосовать</button>
-          </div>
-        </article>
-      `).join("");
+            : (isVideo
+                ? `<video controls preload="metadata" src="${n.image}" style="width:100%;border-radius:10px"></video>`
+                : `<img src="${n.image}" alt="${n.name}">`);
+          return `
+            <article class="nominee-card">
+              ${media}
+              <div class="info">
+                <div class="nominee-name">${n.name}</div>
+                <button class="btn btn-vote" data-category="${data.id}" data-nominee="${n.id}">Проголосовать</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
 
       modal.classList.remove('hidden');
     } catch (err) {
@@ -70,6 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const categoryId = btn.getAttribute('data-category');
     const nomineeId  = btn.getAttribute('data-nominee');
+    if (!nomineeId || !categoryId) return;
+
+    if (['active-year','inactive-year'].includes(categoryId)) {
+      alert('Голосование по этой категории закрыто. Итоги будут позже.');
+      return;
+    }
     btn.disabled = true;
     const original = btn.textContent;
     btn.textContent = 'Голосуем...';

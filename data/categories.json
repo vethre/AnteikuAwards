@@ -3,31 +3,27 @@
     {
       "id": "active-year",
       "title": "Актив Года",
-      "nominees": [
-        { "id": "user1", "name": "Дима",    "image": "/static/img/candidates/dima.jpg" },
-        { "id": "user2", "name": "Настя",   "image": "/static/img/candidates/dima.jpg" },
-        { "id": "user3", "name": "Никита",  "image": "/static/img/candidates/dima.jpg" }
-      ]
+      "locked": true,
+      "cover": "/static/img/unknown.png",
+      "nominees": []
     },
     {
       "id": "inactive-year",
       "title": "Неактив Года",
-      "nominees": [
-        { "id": "user4", "name": "Дима",   "image": "/static/img/candidates/dima.jpg" },
-        { "id": "user5", "name": "Маша",    "image": "/static/img/candidates/dima.jpg" },
-        { "id": "user6", "name": "Мацони",    "image": "/static/img/candidates/dima.jpg" }
-      ]
+      "locked": true,
+      "cover": "/static/img/unknown.png",
+      "nominees": []
     },
 
     { "id": "meme-of-the-year",
       "title": "Мем Года",
       "nominees": [
-        { "id": "meme1", "name": "кто из ваз", "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme2", "name": "шахта попка",  "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme3", "name": "чухмарики",  "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme4", "name": "кружки мацони",  "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme5", "name": "ыбло",  "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/candidates/dima.jpg" }
+        { "id": "meme1", "name": "кто из ваз", "image": "/static/img/trophy.png" },
+        { "id": "meme2", "name": "шахта попка",  "image": "/static/img/trophy.png" },
+        { "id": "meme3", "name": "чухмарики",  "image": "/static/img/trophy.png" },
+        { "id": "meme4", "name": "кружки мацони",  "image": "/static/img/trophy.png" },
+        { "id": "meme5", "name": "ыбло",  "image": "/static/img/trophy.png" },
+        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/trophy.png" }
       ]
     },
     { "id": "gif-of-the-year",
