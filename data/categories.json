@@ -22,37 +22,40 @@
     { "id": "meme-of-the-year",
       "title": "Мем Года",
       "nominees": [
-        { "id": "meme1", "name": "бихбоп", "image": "/static/img/candidates/dima.jpg" },
-        { "id": "meme2", "name": "53",  "image": "/static/img/candidates/dima.jpg" }
-      ]
-    },
-    { "id": "conflict-of-the-year",
-      "title": "Конфликт Года",
-      "nominees": [
-        { "id": "conf1", "name": "Срач #1", "image": "/static/img/candidates/dima.jpg" },
-        { "id": "conf2", "name": "Срач #2", "image": "/static/img/candidates/dima.jpg" }
+        { "id": "meme1", "name": "кто из ваз", "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme2", "name": "шахта попка",  "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme3", "name": "чухмарики",  "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme4", "name": "кружки мацони",  "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme5", "name": "ыбло",  "image": "/static/img/candidates/dima.jpg" },
+        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/candidates/dima.jpg" }
       ]
     },
     { "id": "gif-of-the-year",
       "title": "GIF Года",
       "nominees": [
-        { "id": "gif1", "name": "мшк фреде", "image": "/static/img/candidates/dima.jpg" },
-        { "id": "gif2", "name": "Дуля",      "image": "/static/img/candidates/dima.jpg" }
+        { "id": "gif1", "name": "1 HP", "image": "/static/img/candidates/1hp.mp4" },
+        { "id": "gif2", "name": "53",      "image": "/static/img/candidates/53.mp4" },
+        { "id": "gif3", "name": "Чел базарит со стеной",      "image": "/static/img/candidates/Stenka.mp4" },
+        { "id": "gif4", "name": "Добрый вечер в чём проблема две р написать",      "image": "/static/img/candidates/DoubleRR.mp4" },
+        { "id": "gif5", "name": "Маша матерится",      "image": "/static/img/candidates/MashaBomb.mp4" },
+        { "id": "gif6", "name": "Фотки Никиты",      "image": "/static/img/candidates/Nikitos.mp4" },
+        { "id": "gif7", "name": "Надувательство",      "image": "/static/img/candidates/Ukrajinci.mp4" },
+        { "id": "gif8", "name": "5x30",      "image": "/static/img/candidates/Narkosha.mp4" }
       ]
     },
     { "id": "avatar-of-the-year",
       "title": "Ава Года",
       "nominees": [
-        { "id": "ava1", "name": "AVA #1", "image": "/static/img/candidates/dima.jpg" },
-        { "id": "ava2", "name": "AVA #2", "image": "/static/img/candidates/dima.jpg" }
+        { "id": "ava1", "name": "АВА #1", "image": "/static/img/candidates/ava1.jpg" },
+        { "id": "ava2", "name": "АВА #2", "image": "/static/img/candidates/ava2.jpg" }
       ]
     },
     { "id": "song-of-the-year",
       "title": "Трек Года",
       "nominees": [
-        { "id": "track1", "name": "Вруби монетизацию", "audio": "/static/media/calm.mp3" },
-        { "id": "track2", "name": "Квартет Хит",       "audio": "/static/media/ending.mp3" },
-        { "id": "track3", "name": "Трио Хит",          "audio": "/static/media/tense.mp3" }
+        { "id": "track1", "name": "один - placeboi", "audio": "/static/media/alone.mp3" },
+        { "id": "track2", "name": "STAS V SOLO - Dum4uk",       "audio": "/static/media/stasvsolo.mp3" },
+        { "id": "track3", "name": "порванные кеды - barikkk",          "audio": "/static/media/kedz.mp3" }
       ]
     }
   ]
