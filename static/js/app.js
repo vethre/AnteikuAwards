@@ -37,7 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
       modalTitle.textContent = data.title;
       modalNominees.innerHTML = data.nominees.map(n => `
         <article class="nominee-card">
-          ${n.audio ? `<audio controls preload="none" src="${n.audio}"></audio>` : `<img src="${n.image}" alt="${n.name}">`}
+          ${n.audio
+            ? `<audio controls preload="none" src="${n.audio}"></audio>`
+            : n.image.endsWith(".mp4")
+              ? `<video controls preload="metadata" src="${n.image}" style="width:100%;border-radius:10px"></video>`
+              : `<img src="${n.image}" alt="${n.name}">`}
           <div class="info">
             <div class="nominee-name">${n.name}</div>
             <button class="btn btn-vote" data-category="${data.id}" data-nominee="${n.id}">Проголосовать</button>
@@ -48,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       modal.classList.remove('hidden');
     } catch (err) {
       console.error('Category load failed:', err);
-      alert('Не вдалося завантажити категорію');
+      alert('Не удалось загрузить категорию');
     }
   });
 
@@ -68,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nomineeId  = btn.getAttribute('data-nominee');
     btn.disabled = true;
     const original = btn.textContent;
-    btn.textContent = 'Voting…';
+    btn.textContent = 'Голосуем...';
 
     try {
       const res = await fetch('/api/vote', {
@@ -80,10 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = await res.text();
         btn.disabled = false;
         btn.textContent = original;
-        alert(text || 'Vote failed');
+        alert(text || 'Голосование не удалось');
         return;
       }
-      btn.textContent = 'Voted ✓';
+      btn.textContent = 'Проголосовано ✓';
       document.querySelectorAll(`.btn-vote[data-category="${categoryId}"]`).forEach(b => {
         if (b !== btn) b.disabled = true;
         b.classList.add('voted');
@@ -92,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       btn.disabled = false;
       btn.textContent = original;
-      alert('Network error');
+      alert('Проблема сети');
     }
   });
 });
