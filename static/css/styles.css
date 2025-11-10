@@ -407,4 +407,4 @@ body::before{
 
 /* Підрівняємо “Другие номинации” */
 .small-cats { max-width: 780px; gap: 12px; }
-.cat-btn { padding: 12px 14px; border-radius: 12px; }
+.cat-btn { padding: 12px 14px; border-radius: 12px; } 
