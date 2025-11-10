@@ -36,7 +36,7 @@
         { "id": "gif1", "name": "1 HP", "image": "/static/img/candidates/1hp.mp4" },
         { "id": "gif2", "name": "53",      "image": "/static/img/candidates/53.mp4" },
         { "id": "gif3", "name": "Чел базарит со стеной",      "image": "/static/img/candidates/Stenka.mp4" },
-        { "id": "gif4", "name": "Добрый вечер в чём проблема две р написать",      "image": "/static/img/candidates/DoubleRR.mp4" },
+        { "id": "gif4", "name": "Добрый вечер в чём проблема две р написать",      "image": "/static/img/candidates/doubleRR.mp4" },
         { "id": "gif5", "name": "Маша матерится",      "image": "/static/img/candidates/MashaBomb.mp4" },
         { "id": "gif6", "name": "Фотки Никиты",      "image": "/static/img/candidates/Nikitos.mp4" },
         { "id": "gif7", "name": "Надувательство",      "image": "/static/img/candidates/Ukrajinci.mp4" },
