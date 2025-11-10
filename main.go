@@ -80,6 +80,7 @@ func main() {
 	votesMu.Unlock()
 
 	mux := http.NewServeMux()
+	handler := cacheStatic(logRequests(mux))
 
 	// Static files
 	fs := http.FileServer(http.Dir("static"))
@@ -149,7 +150,7 @@ func main() {
 	}
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           logRequests(mux),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -169,6 +170,15 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("server error: %v", err)
 	}
+}
+
+func cacheStatic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func verifyTelegramAuth(values url.Values, botToken string) (map[string]string, bool) {

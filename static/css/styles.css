@@ -83,7 +83,7 @@ body::before{
 /* Soft color blobs behind */
 .bg-orbs{
   position:fixed;inset:-20vmax;z-index:-2;pointer-events:none; opacity: .7; mix-blend-mode: screen;
-  filter: blur(70px) saturate(1.25) opacity(.65);
+  filter: blur(30px) saturate(1.25) opacity(.65);
   background:
     radial-gradient(42vmax 42vmax at 12% 8%,  rgba(255,230,130,.10), transparent 60%),
     radial-gradient(34vmax 34vmax at 85% 18%, rgba(255,120,0,.10),  transparent 60%),

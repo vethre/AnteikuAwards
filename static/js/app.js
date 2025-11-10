@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<audio controls preload="none" src="${n.audio}"></audio>`
             : (isVideo
                 ? `<video controls preload="metadata" src="${n.image}" style="width:100%;border-radius:10px"></video>`
-                : `<img src="${n.image}" alt="${n.name}">`);
+                : `<img loading="lazy" decoding="async" src="${n.image}" alt="${n.name}">`);
           return `
             <article class="nominee-card">
               ${media}
@@ -151,43 +151,45 @@ function burst(anchor) {
 }
 
 // Snow
+// Snow (лайт-версія)
 (() => {
   const cvs = document.getElementById('snow');
   if (!cvs) return;
   const ctx = cvs.getContext('2d');
-  let W, H, flakes = [];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, flakes = [], running = true;
 
   function resize(){
-    W = cvs.width = window.innerWidth;
-    H = cvs.height = window.innerHeight;
-    flakes = Array.from({length: Math.min(140, Math.floor(W*H/12000))}).map(()=>spawn());
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // даунскейл
+    W = cvs.width = Math.floor(window.innerWidth  * dpr);
+    H = cvs.height = Math.floor(window.innerHeight * dpr);
+    cvs.style.width  = '100%';
+    cvs.style.height = '100%';
+    const base = Math.floor((W/dpr)*(H/dpr)/18000);           // рідше
+    const count = reduce ? 0 : Math.min(90, Math.max(30, base));
+    flakes = Array.from({length: count}).map(()=>spawn());
   }
   function spawn(){
-    const r = 1 + Math.random()*2.5;
-    return {
-      x: Math.random()*W,
-      y: Math.random()*H,
-      r,
-      s: .6 + Math.random()*1.2,      // speed
-      a: Math.random()*Math.PI*2,     // angle
-      drift: .4 + Math.random()*1.1   // horizontal drift
-    };
+    const r = 1 + Math.random()*2;
+    return { x: Math.random()*W, y: Math.random()*H, r, s: .4 + Math.random()*1, a: Math.random()*Math.PI*2, drift: .3 + Math.random()*0.8 };
   }
   function tick(){
+    if (!running) return requestAnimationFrame(tick);
     ctx.clearRect(0,0,W,H);
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     for (const f of flakes){
-      f.y += f.s;
-      f.x += Math.cos(f.a += 0.01)*f.drift;
+      f.y += f.s; f.x += Math.cos(f.a += 0.01)*f.drift;
       if (f.y > H + 10) { f.y = -10; f.x = Math.random()*W; }
       if (f.x < -10) f.x = W+10; if (f.x > W+10) f.x = -10;
       ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.fill();
     }
     requestAnimationFrame(tick);
   }
+  document.addEventListener('visibilitychange', () => { running = !document.hidden; });
   window.addEventListener('resize', resize, {passive:true});
   resize(); tick();
 })();
+
 
 // --- Parallax for hero assets ---
 (() => {
