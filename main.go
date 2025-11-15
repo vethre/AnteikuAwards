@@ -50,6 +50,8 @@ var (
 	votes   = map[string]map[string]int{}
 )
 
+var siteURL = strings.TrimRight(os.Getenv("SITE_URL"), "/")
+
 var db *sql.DB
 
 var allCategories Categories
@@ -450,13 +452,12 @@ func nomineeExists(c *Category, nomineeID string) bool {
 
 func render(w http.ResponseWriter, page string, data any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	merged := map[string]any{"Page": page}
+	merged := map[string]any{"Page": page, "SiteURL": siteURL}
 	if m, ok := data.(map[string]any); ok {
 		for k, v := range m {
 			merged[k] = v
 		}
 	}
-
 	if err := templates.ExecuteTemplate(w, "base.html", merged); err != nil {
 		log.Printf("template error: %v", err)
 		http.Error(w, "template error", http.StatusInternalServerError)

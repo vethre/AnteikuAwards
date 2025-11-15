@@ -1,0 +1,31 @@
+# Binaries
+/anteikuawards
+/anteikuawards.exe
+/anteikuawards.test
+
+# Go build/test artifacts
+*.exe~
+*.test
+*.out
+*.log
+
+# Dependency directories (if used)
+vendor/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Node / frontend tooling (if later added)
+node_modules/
+dist/
+build/
