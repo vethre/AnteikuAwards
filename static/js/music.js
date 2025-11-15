@@ -1,7 +1,6 @@
 const audio = document.getElementById("bg-music");
 const btn   = document.getElementById("mute-toggle");
 
-// Автовідтворення: пробуємо грати при першій взаємодії
 function tryPlay(){
   if (!audio) return;
   audio.play().catch(() => {/* браузер блочить до взаємодії — ок */});
@@ -9,7 +8,6 @@ function tryPlay(){
 
 window.addEventListener("DOMContentLoaded", async () => {
   if (!audio) return;
-  // тягнемо стан із БД
   try {
     const r = await fetch("/api/prefs/music");
     if (r.ok) {
