@@ -120,6 +120,7 @@ func main() {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	})
 	mux.HandleFunc("/tg-auth", tgAuthHandler)
+	mux.HandleFunc("/api/vote/status", voteStatusAPIHandler)
 
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
@@ -467,6 +468,50 @@ func voteAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+}
+
+func voteStatusAPIHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userKey, ok := getTelegramUser(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	categoryID := r.URL.Query().Get("categoryId")
+	if categoryID == "" {
+		http.Error(w, "missing categoryId", http.StatusBadRequest)
+		return
+	}
+
+	var nomineeID string
+	err := db.QueryRow(
+		`SELECT nominee_id FROM votes WHERE user_key=$1 AND category_id=$2`,
+		userKey, categoryID,
+	).Scan(&nomineeID)
+
+	if err == sql.ErrNoRows {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"voted": false,
+		})
+		return
+	}
+	if err != nil {
+		log.Printf("voteStatus err: %v", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"voted":     true,
+		"nomineeId": nomineeID,
+	})
 }
 
 func parseVotedCookie(r *http.Request) []string {

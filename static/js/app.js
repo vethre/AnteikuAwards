@@ -63,18 +63,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </article>
           `;
         }).join("");
-        // восстановить состояние "Проголосовано" из localStorage
-        const votedId = localStorage.getItem(`voted_${data.id}`);
-        if (votedId) {
-          document.querySelectorAll(`.btn-vote[data-category="${data.id}"]`).forEach(b => {
-            const nid = b.getAttribute('data-nominee');
-            if (nid === votedId) {
-              b.textContent = 'Проголосовано ✓';
-            } else {
-              b.disabled = true;
+        try {
+          const stRes = await fetch(`/api/vote/status?categoryId=${encodeURIComponent(data.id)}`);
+          if (stRes.ok) {
+            const st = await stRes.json();
+            if (st.voted && st.nomineeId) {
+              document.querySelectorAll(`.btn-vote[data-category="${data.id}"]`).forEach(b => {
+                const nid = b.getAttribute('data-nominee');
+                if (nid === st.nomineeId) {
+                  b.textContent = 'Проголосовано ✓';
+                } else {
+                  b.disabled = true;
+                }
+                b.classList.add('voted');
+              });
             }
-            b.classList.add('voted');
-          });
+          }
+        } catch (err) {
+          console.warn('vote status check failed', err);
         }
       }
 
@@ -131,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll(`.btn-vote[data-category="${categoryId}"]`).forEach(b => {
         if (b !== btn) b.disabled = true;
         b.classList.add('voted');
-        localStorage.setItem(`voted_${categoryId}`, nomineeId);
       });
       burst(btn);
     } catch (err) {
