@@ -63,6 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
             </article>
           `;
         }).join("");
+        // восстановить состояние "Проголосовано" из localStorage
+        const votedId = localStorage.getItem(`voted_${data.id}`);
+        if (votedId) {
+          document.querySelectorAll(`.btn-vote[data-category="${data.id}"]`).forEach(b => {
+            const nid = b.getAttribute('data-nominee');
+            if (nid === votedId) {
+              b.textContent = 'Проголосовано ✓';
+            } else {
+              b.disabled = true;
+            }
+            b.classList.add('voted');
+          });
+        }
       }
 
       modal.classList.remove('hidden');
@@ -106,13 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = await res.text();
         btn.disabled = false;
         btn.textContent = original;
-        alert(text || 'Голосование не удалось');
+
+        if (res.status === 401) {
+          alert(text || 'Сначала войди через Telegram в шапке сайта 😉');
+        } else {
+          alert(text || 'Голосование не удалось');
+        }
         return;
       }
       btn.textContent = 'Проголосовано ✓';
       document.querySelectorAll(`.btn-vote[data-category="${categoryId}"]`).forEach(b => {
         if (b !== btn) b.disabled = true;
         b.classList.add('voted');
+        localStorage.setItem(`voted_${categoryId}`, nomineeId);
       });
       burst(btn);
     } catch (err) {

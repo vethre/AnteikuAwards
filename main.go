@@ -147,6 +147,13 @@ func main() {
 	music_on boolean NOT NULL DEFAULT true,
 	updated_at timestamptz NOT NULL DEFAULT now()
 	)`)
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS users (
+	tg_id text PRIMARY KEY,
+	username text,
+	first_name text,
+	last_name text,
+	updated_at timestamptz NOT NULL DEFAULT now()
+	)`)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -227,11 +234,47 @@ func tgAuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tgID := data["id"]
+	username := data["username"]
+	first := data["first_name"]
+	last := data["last_name"]
+
+	_, _ = db.Exec(`
+	INSERT INTO users(tg_id, username, first_name, last_name)
+	VALUES ($1,$2,$3,$4)
+	ON CONFLICT (tg_id) DO UPDATE
+		SET username=EXCLUDED.username,
+			first_name=EXCLUDED.first_name,
+			last_name=EXCLUDED.last_name,
+			updated_at=now()
+	`, tgID, username, first, last)
+
 	// Переприв’язуємо user_key до Telegram
 	http.SetCookie(w, &http.Cookie{
 		Name: "av_uid", Value: "tg_" + tgID, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode, MaxAge: 60 * 60 * 24 * 365,
 	})
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func buildProfile(r *http.Request) map[string]any {
+	uid, ok := getTelegramUser(r)
+	if !ok {
+		return nil
+	}
+
+	var username sql.NullString
+	// uid вида "tg_123456", нам треба сам id
+	_ = db.QueryRow(
+		`SELECT username FROM users WHERE tg_id = $1`,
+		strings.TrimPrefix(uid, "tg_"),
+	).Scan(&username)
+
+	if username.Valid && username.String != "" {
+		return map[string]any{
+			"Username": username.String,
+		}
+	}
+
+	return nil
 }
 
 func getOrSetUserKey(w http.ResponseWriter, r *http.Request) string {
@@ -294,12 +337,15 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	render(w, "index_content", map[string]any{})
+	render(w, "index_content", map[string]any{
+		"Profile": buildProfile(r),
+	})
 }
 
 func voteHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, "vote_content", map[string]any{
 		"Categories": allCategories.Categories,
+		"Profile":    buildProfile(r),
 	})
 }
 
@@ -340,7 +386,10 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		out = append(out, cr)
 	}
-	render(w, "results_content", map[string]any{"Results": out})
+	render(w, "results_content", map[string]any{
+		"Results": out,
+		"Profile": buildProfile(r),
+	})
 }
 
 type voteRequest struct {
@@ -397,7 +446,11 @@ func voteAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check cookie for per-category vote prevention
-	userKey := getOrSetUserKey(w, r)
+	userKey, ok := getTelegramUser(r)
+	if !ok {
+		http.Error(w, "Нужно войти через Telegram, чтобы голосовать", http.StatusUnauthorized)
+		return
+	}
 
 	// заборона повторного голосу на уровне БД (UNIQUE)
 	_, err := db.Exec(`INSERT INTO votes(user_key, category_id, nominee_id) VALUES ($1,$2,$3)`,
@@ -448,6 +501,17 @@ func nomineeExists(c *Category, nomineeID string) bool {
 		}
 	}
 	return false
+}
+
+func getTelegramUser(r *http.Request) (string, bool) {
+	c, err := r.Cookie("av_uid")
+	if err != nil || c.Value == "" {
+		return "", false
+	}
+	if !strings.HasPrefix(c.Value, "tg_") {
+		return "", false
+	}
+	return c.Value, true
 }
 
 func render(w http.ResponseWriter, page string, data any) {

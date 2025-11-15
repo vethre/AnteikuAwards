@@ -99,7 +99,23 @@ body::before{
 
 /* Layout */
 .page{display:flex;flex-direction:column;min-height:100%}
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #1e1e24}
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 24px;
+  border-bottom:1px solid #1e1e24;
+  gap:12px;
+}
+
+.header-right {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+
+
 .brand{font-family:"Playfair Display", serif;font-weight:700;font-size:22px;color:var(--gold);text-decoration:none;letter-spacing:0.4px}
 
 /* Polychrome / liquid gradient text */
@@ -423,7 +439,40 @@ body::before{
 .cat-btn { padding: 12px 14px; border-radius: 12px; } 
 
 .header{gap:12px}
-.auth-slot{display:flex;align-items:center;justify-content:center; min-width:180px}
+.auth-slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:180px;
+}
+.profile-pill {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(20,20,24,.65);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(12px) saturate(140%);
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+  font-size:14px;
+  color:var(--text);
+}
+
+.profile-avatar {
+  font-size:18px;
+}
+
+.profile-name {
+  max-width:140px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 @media (max-width:720px){
-  .auth-slot{transform:scale(.92); transform-origin:right center;}
+  .auth-slot{transform:scale(.9); transform-origin:right center;}
+  .profile-pill{padding:4px 10px;font-size:13px;}
 }
