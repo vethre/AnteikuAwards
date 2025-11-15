@@ -94,6 +94,7 @@ func main() {
 	mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/vote", voteHandler)
 	mux.HandleFunc("/results", resultsHandler)
+	mux.HandleFunc("/admin", adminHandler)
 
 	// API
 	mux.HandleFunc("/api/vote", voteAPIHandler)
@@ -182,6 +183,19 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("server error: %v", err)
 	}
+}
+
+func isAdmin(r *http.Request) bool {
+	uid, ok := getTelegramUser(r)
+	if !ok {
+		return false
+	}
+	adminID := os.Getenv("ADMIN_TG_ID")
+	if adminID == "" {
+		return false
+	}
+	// cookie выглядит как "tg_123456789"
+	return strings.TrimPrefix(uid, "tg_") == adminID
 }
 
 func cacheStatic(next http.Handler) http.Handler {
@@ -313,6 +327,7 @@ func mustParseTemplates() {
 		filepath.Join("templates", "index.html"),
 		filepath.Join("templates", "vote.html"),
 		filepath.Join("templates", "results.html"),
+		filepath.Join("templates", "admin.html"),
 	)
 	if err != nil {
 		log.Fatalf("parse templates: %v", err)
@@ -340,6 +355,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	render(w, "index_content", map[string]any{
 		"Profile": buildProfile(r),
+		"IsAdmin": isAdmin(r),
 	})
 }
 
@@ -347,6 +363,7 @@ func voteHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, "vote_content", map[string]any{
 		"Categories": allCategories.Categories,
 		"Profile":    buildProfile(r),
+		"IsAdmin":    isAdmin(r),
 	})
 }
 
@@ -390,12 +407,80 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, "results_content", map[string]any{
 		"Results": out,
 		"Profile": buildProfile(r),
+		"IsAdmin": isAdmin(r),
 	})
 }
 
 type voteRequest struct {
 	CategoryID string `json:"categoryId"`
 	NomineeID  string `json:"nomineeId"`
+}
+
+func adminHandler(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		http.NotFound(w, r)
+		return
+	}
+
+	type AdminRow struct {
+		CategoryID    string
+		CategoryTitle string
+		NomineeID     string
+		NomineeName   string
+		Count         int
+	}
+
+	// карты для названий категорий и номинантов
+	catTitle := make(map[string]string)
+	nomName := make(map[string]map[string]string)
+	for _, c := range allCategories.Categories {
+		catTitle[c.ID] = c.Title
+		m := make(map[string]string)
+		for _, n := range c.Nominees {
+			m[n.ID] = n.Name
+		}
+		nomName[c.ID] = m
+	}
+
+	rows, err := db.Query(`
+		SELECT category_id, nominee_id, COUNT(*) 
+		FROM votes 
+		GROUP BY category_id, nominee_id 
+		ORDER BY category_id, COUNT(*) DESC`)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var list []AdminRow
+	for rows.Next() {
+		var catID, nomID string
+		var cnt int
+		if err := rows.Scan(&catID, &nomID, &cnt); err != nil {
+			http.Error(w, "db scan error", http.StatusInternalServerError)
+			return
+		}
+		ar := AdminRow{
+			CategoryID:    catID,
+			CategoryTitle: catTitle[catID],
+			NomineeID:     nomID,
+			NomineeName:   nomName[catID][nomID],
+			Count:         cnt,
+		}
+		list = append(list, ar)
+	}
+
+	var totalVotes, totalVoters int
+	_ = db.QueryRow(`SELECT COUNT(*) FROM votes`).Scan(&totalVotes)
+	_ = db.QueryRow(`SELECT COUNT(DISTINCT user_key) FROM votes`).Scan(&totalVoters)
+
+	render(w, "admin_content", map[string]any{
+		"IsAdmin":     true,
+		"Rows":        list,
+		"TotalVotes":  totalVotes,
+		"TotalVoters": totalVoters,
+	})
 }
 
 func getMusicPref(w http.ResponseWriter, r *http.Request) {

@@ -44,6 +44,9 @@
       <nav class="nav">
         <a class="nav-link" href="/vote">Голосование</a>
         <a class="nav-link" href="/results">Слова</a>
+        {{ if .IsAdmin }}
+          <a class="nav-link nav-link-admin" href="/admin">Админ</a>
+        {{ end }}
       </nav>
 
       <div class="header-right">
@@ -75,6 +78,8 @@
         {{ template "vote_content" . }}
       {{ else if eq .Page "results_content" }}
         {{ template "results_content" . }}
+      {{ else if eq .Page "admin_content" }}
+        {{ template "admin_content" . }}
       {{ end }}
     </main>
 

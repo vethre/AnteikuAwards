@@ -476,3 +476,49 @@ body::before{
   .auth-slot{transform:scale(.9); transform-origin:right center;}
   .profile-pill{padding:4px 10px;font-size:13px;}
 }
+
+.nav-link-admin{
+  border-radius: 999px;
+  padding-inline: 18px;
+  border: 1px solid rgba(212,175,55,.7);
+  background: linear-gradient(135deg, rgba(212,175,55,.18), rgba(255,255,255,.03));
+}
+
+.admin-summary{
+  margin: 16px auto 24px;
+  max-width: 520px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.admin-summary .label{
+  opacity: .75;
+  margin-right: 4px;
+}
+
+.admin-table-wrap{
+  max-width: 920px;
+  margin: 0 auto 40px;
+  padding: 12px 16px;
+}
+
+.admin-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td{
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  text-align: left;
+}
+
+.admin-table th{
+  font-weight: 600;
+  opacity: .9;
+}
