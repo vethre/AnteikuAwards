@@ -18,13 +18,13 @@
     { "id": "meme-of-the-year",
       "title": "Мем Года",
       "nominees": [
-        { "id": "meme1", "name": "кто из ваз", "image": "/static/img/ktoizvaz.png" },
-        { "id": "meme2", "name": "шахта попка",  "image": "/static/img/shakhtapopka.png" },
-        { "id": "meme3", "name": "чухмарики",  "image": "/static/img/chukhmariki.png" },
-        { "id": "meme4", "name": "кружки мацони",  "image": "/static/img/matsoni.jpg" },
-        { "id": "meme5", "name": "ыбло",  "image": "/static/img/yblo.png" },
-        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/bockovy_ogurtsy.png" },
-        { "id": "meme7", "name": "я стрелял в трампа",  "image": "/static/img/trumpik.png" }
+        { "id": "meme1", "name": "кто из ваз" },
+        { "id": "meme2", "name": "шахта попка" },
+        { "id": "meme3", "name": "чухмарики" },
+        { "id": "meme4", "name": "кружки мацони" },
+        { "id": "meme5", "name": "ыбло" },
+        { "id": "meme6", "name": "бочковые огурцы" },
+        { "id": "meme7", "name": "я стрелял в трампа" }
       ]
     },
     { "id": "gif-of-the-year",
