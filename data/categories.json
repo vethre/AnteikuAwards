@@ -23,7 +23,7 @@
         { "id": "meme3", "name": "чухмарики",  "image": "/static/img/chukhmariki.png" },
         { "id": "meme4", "name": "кружки мацони",  "image": "/static/img/matsoni.jpg" },
         { "id": "meme5", "name": "ыбло",  "image": "/static/img/yblo.png" },
-        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/bochkovy_ogurtsy.png" },
+        { "id": "meme6", "name": "бочковые огурцы",  "image": "/static/img/bockovy_ogurtsy.png" },
         { "id": "meme7", "name": "я стрелял в трампа",  "image": "/static/img/trumpik.png" }
       ]
     },
