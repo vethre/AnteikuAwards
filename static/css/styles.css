@@ -170,6 +170,18 @@ body::before{
 .btn-vote{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 12px;border-radius:999px;cursor:pointer}
 .btn-vote:hover{background:rgba(212,175,55,.12)}
 .btn-vote[disabled]{opacity:.5;cursor:not-allowed}
+.btn-vote.voted {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #0b1220;
+}
+
+.btn-vote.voted.btn-cancel-hover {
+  background: linear-gradient(135deg, #6366f1, #a855f7); /* сине-фиолетовый */
+  color: #f9fafb;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px) scale(1.02);
+}
+
 
 .results{list-style:none;margin:0;padding:0}
 .results li{border:1px solid #2a2a35;background:var(--accent);border-radius:12px;margin:10px 0;padding:10px 12px}

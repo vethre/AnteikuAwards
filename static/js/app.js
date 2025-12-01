@@ -72,10 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nid = b.getAttribute('data-nominee');
                 if (nid === st.nomineeId) {
                   b.textContent = 'Проголосовано ✓';
+                  b.classList.add('voted');
+                  b.disabled = false; // на неё можно навести и отменить
                 } else {
-                  b.disabled = true;
+                  b.disabled = true;  // другие заблокированы
+                  b.classList.remove('voted');
                 }
-                b.classList.add('voted');
               });
             }
           }
@@ -99,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ===== Голосування (делегування на динамічні кнопки) =====
+    // ===== Голосування (делегування на динамічні кнопки) =====
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-vote');
     if (!btn) return;
@@ -111,6 +114,51 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Голосование по этой категории закрыто. Итоги будут позже.');
       return;
     }
+
+    const isVoted = btn.classList.contains('voted');
+    const isCancelMode = btn.classList.contains('btn-cancel-hover');
+
+    // === Клик по "Отменить" ===
+    if (isVoted && isCancelMode) {
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Отменяем...';
+
+      try {
+        const res = await fetch('/api/vote/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ categoryId })
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          btn.disabled = false;
+          btn.textContent = original;
+          alert(text || 'Не удалось отменить голос');
+          return;
+        }
+
+        // Сброс состояния всех кнопок категории
+        document.querySelectorAll(`.btn-vote[data-category="${categoryId}"]`).forEach(b => {
+          b.disabled = false;
+          b.classList.remove('voted', 'btn-cancel-hover');
+          b.textContent = 'Проголосовать';
+        });
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = original;
+        alert('Проблема сети');
+      }
+      return;
+    }
+
+    // Уже проголосовано, но не в режиме отмены — игнорим клик
+    if (isVoted) {
+      return;
+    }
+
+    // === Обычное голосование ===
     btn.disabled = true;
     const original = btn.textContent;
     btn.textContent = 'Голосуем...';
@@ -133,10 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
       }
+
       btn.textContent = 'Проголосовано ✓';
       document.querySelectorAll(`.btn-vote[data-category="${categoryId}"]`).forEach(b => {
-        if (b !== btn) b.disabled = true;
-        b.classList.add('voted');
+        if (b === btn) {
+          b.disabled = false;
+          b.classList.add('voted');
+        } else {
+          b.disabled = true;
+          b.classList.remove('voted');
+        }
       });
       burst(btn);
     } catch (err) {
@@ -144,8 +198,30 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = original;
       alert('Проблема сети');
     }
+
+      // ===== Hover по кнопке "Проголосовано" -> "Отменить" =====
+    document.addEventListener('mouseenter', (e) => {
+      const btn = e.target.closest('.btn-vote.voted');
+      if (!btn) return;
+
+      // если кто-то уже в cancel-режиме — не трогаем
+      if (!btn.dataset.originalLabel) {
+        btn.dataset.originalLabel = btn.textContent;
+      }
+      btn.textContent = 'Отменить';
+      btn.classList.add('btn-cancel-hover');
+    }, true);
+
+    document.addEventListener('mouseleave', (e) => {
+      const btn = e.target.closest('.btn-vote.voted');
+      if (!btn) return;
+
+      // вернём прежний текст
+      const original = btn.dataset.originalLabel || 'Проголосовано ✓';
+      btn.textContent = original;
+      btn.classList.remove('btn-cancel-hover');
+    }, true);
   });
-});
 
 function burst(anchor) {
   const colors = ['#d4af37','#f1d97a','#fff'];
@@ -228,4 +304,4 @@ function burst(anchor) {
     logo.style.transform = `translate3d(${x/6}px, ${y/6}px, 0)`;   // мягче
     cup .style.transform = `translate3d(${x/3}px, ${y/3}px, 0)`;   // чуть сильнее
   }, {passive:true});
-})();
+})()});

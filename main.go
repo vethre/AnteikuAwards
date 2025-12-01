@@ -98,6 +98,7 @@ func main() {
 
 	// API
 	mux.HandleFunc("/api/vote", voteAPIHandler)
+	mux.HandleFunc("/api/vote/cancel", voteCancelAPIHandler)
 	mux.HandleFunc("/api/category/", func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/api/category/")
 		for _, c := range allCategories.Categories {
@@ -549,6 +550,67 @@ func voteAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// (не обязательно, но если хочешь — можешь продолжать вести in-memory счётчик)
 	votesMu.Lock()
 	votes[req.CategoryID][req.NomineeID]++
+	votesMu.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+}
+
+func voteCancelAPIHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost { // можно DELETE, но POST проще с фронта
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req voteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	if req.CategoryID == "" {
+		http.Error(w, "missing categoryId", http.StatusBadRequest)
+		return
+	}
+
+	userKey, ok := getTelegramUser(r)
+	if !ok {
+		http.Error(w, "Нужно войти через Telegram, чтобы голосовать", http.StatusUnauthorized)
+		return
+	}
+
+	// узнаём, кого он выбрал
+	var nomineeID string
+	err := db.QueryRow(
+		`SELECT nominee_id FROM votes WHERE user_key=$1 AND category_id=$2`,
+		userKey, req.CategoryID,
+	).Scan(&nomineeID)
+	if err == sql.ErrNoRows {
+		// Нет голоса — считаем, что и так всё ок
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "message": "no vote"})
+		return
+	}
+	if err != nil {
+		log.Printf("select vote for cancel err: %v", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	// удаляем голос
+	if _, err := db.Exec(
+		`DELETE FROM votes WHERE user_key=$1 AND category_id=$2`,
+		userKey, req.CategoryID,
+	); err != nil {
+		log.Printf("delete vote err: %v", err)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	// синхронизируем in-memory счётчик
+	votesMu.Lock()
+	if votes[req.CategoryID] != nil && votes[req.CategoryID][nomineeID] > 0 {
+		votes[req.CategoryID][nomineeID]--
+	}
 	votesMu.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")
