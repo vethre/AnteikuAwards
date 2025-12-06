@@ -18,11 +18,10 @@ body{
   background:#0a0a0b; /* глубокая подложка */
 }
 
+/* OPTIMIZATION: Removed the SVG noise layer and simplified gradients */
 body::before{
   content:"";
   position:fixed; inset:0; z-index:-1; pointer-events:none;
-
-  /* порядок: глубокий линейный → конус для «масляного» → мягкие рад. пятна → зерно */
   background:
     /* 1) ровный переход (OKLCH) */
     linear-gradient(in oklch,
@@ -41,58 +40,36 @@ body::before{
       oklch(0.36 0.06 30) 360deg
     ),
     /* 3) лёгкие тёплые «орбы» */
-    radial-gradient(1200px 900px at 52% 22%, rgba(255,128,0,.10), transparent 65%),
-    radial-gradient(1400px 1000px at 80% 92%, rgba(255,0,0,.08), transparent 65%),
-    /* 4) тонкая плёнка зерна */
-    url("data:image/svg+xml;utf8,\
-      <svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'>\
-        <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter>\
-        <rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/>\
-      </svg>"
-    );
+    radial-gradient(1200px 900px at 52% 22%, rgba(255,128,0,.05), transparent 65%),
+    radial-gradient(1400px 1000px at 80% 92%, rgba(255,0,0,.04), transparent 65%);
 
   background-repeat:no-repeat;
-  background-size:
-    cover,           /* линейный */
-    cover,           /* конус */
-    120% 120%,       /* орб 1 */
-    120% 120%,       /* орб 2 */
-    220px 220px;     /* зерно */
-
-  background-blend-mode:
-    normal,          /* линейный */
-    soft-light,      /* смешивание */
-    normal,
-    normal,
-    overlay;         /* зерно */
-
-  /* фиксируем к вьюпорту, но это ОДИН слой → нет «окон» при скролле */
-  background-attachment: fixed, fixed, fixed, fixed, fixed;
+  background-size: cover, cover, 120% 120%, 120% 120%;
+  background-blend-mode: normal, soft-light, normal, normal;
+  background-attachment: fixed;
   opacity: 1;
 }
 
-/* Liquid glass vibes */
+/* OPTIMIZATION: Removed backdrop-filter */
 .glass{
-  background: rgba(20,20,24,.5);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  background: rgba(20,20,24,.85); /* Increased opacity to compensate */
   border: 1px solid rgba(255,255,255,.06);
   box-shadow: 0 6px 24px rgba(0,0,0,.35);
 }
 
-/* Soft color blobs behind */
+/* OPTIMIZATION: Removed extra filter blur and added will-change */
 .bg-orbs{
-  position:fixed;inset:-20vmax;z-index:-2;pointer-events:none; opacity: .7; mix-blend-mode: screen;
-  filter: blur(30px) saturate(1.25) opacity(.65);
+  position:fixed;inset:-20vmax;z-index:-2;pointer-events:none; opacity: .5; mix-blend-mode: screen;
+  /* filter: blur(30px); REMOVED for performance */
   background:
     radial-gradient(42vmax 42vmax at 12% 8%,  rgba(255,230,130,.10), transparent 60%),
     radial-gradient(34vmax 34vmax at 85% 18%, rgba(255,120,0,.10),  transparent 60%),
     radial-gradient(30vmax 30vmax at 45% 86%, rgba(255,0,0,.10),     transparent 60%);
   animation: floatOrbs 16s ease-in-out infinite alternate;
+  will-change: transform; /* Hardware acceleration hint */
 }
 @keyframes floatOrbs { to { transform: translate3d(0,-2%,0) scale(1.03) } }
 
-/* Snow canvas */
 .snow-canvas{
   position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .78; mix-blend-mode: screen;
 }
@@ -114,12 +91,8 @@ body::before{
   gap:12px;
 }
 
-
-
 .brand{font-family:"Playfair Display", serif;font-weight:700;font-size:22px;color:var(--gold);text-decoration:none;letter-spacing:0.4px}
 
-/* Polychrome / liquid gradient text */
-/* полихромный заголовок слегка приглушён */
 .gradient-text{
   background: linear-gradient(120deg, var(--gold-2), var(--gold), #fff1bf, var(--gold-2));
   background-size: 200% 200%;
@@ -137,14 +110,14 @@ body::before{
 
 .hero{min-height:68svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,6vh,72px) 16px 56px;text-align:center}
 .title{font-family:"Playfair Display", serif;font-size:52px;line-height:1.1}
-.trophy{display:inline-block;filter: drop-shadow(0 4px 8px rgba(212,175,55,.35));animation: float 3s ease-in-out infinite}
+.trophy{display:inline-block;filter: drop-shadow(0 4px 8px rgba(212,175,55,.35));animation: float 3s ease-in-out infinite; will-change: transform;}
 @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
 .subtitle{color:var(--muted);max-width:680px}
 
 .btn{display:inline-block;border:1px solid #2a2a33;background:linear-gradient(180deg, #1a1a22, #121218);color:var(--text);padding:10px 16px;border-radius:12px;text-decoration:none;cursor:pointer;transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.35);border-color:#3a3a48}
 .btn:active{transform:translateY(0)}
-/* кнопка чуть ниже и без жёсткого свечения */
+
 .btn-primary{
   background:linear-gradient(180deg, var(--gold-2), var(--gold));
   color:#221405; border:1px solid #ffd36e;
@@ -161,7 +134,8 @@ body::before{
 .section-title{font-family:"Playfair Display", serif;color:var(--gold);margin:8px 0 20px 0;font-size:28px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:18px}
 
-.card{background:linear-gradient(180deg, rgba(22,22,29,.66), rgba(19,19,26,.66));border:1px solid #262633;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.35);backdrop-filter: blur(10px) saturate(120%);-webkit-backdrop-filter: blur(10px) saturate(120%)}
+/* OPTIMIZATION: Removed backdrop-filter */
+.card{background:linear-gradient(180deg, rgba(22,22,29,.9), rgba(19,19,26,.9));border:1px solid #262633;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.35);}
 .card-title{font-family:"Playfair Display", serif;margin:0 0 12px 0;color:var(--text)}
 
 .nominees{display:flex;flex-direction:column;gap:10px}
@@ -176,7 +150,7 @@ body::before{
 }
 
 .btn-vote.voted.btn-cancel-hover {
-  background: linear-gradient(135deg, #6366f1, #a855f7); /* сине-фиолетовый */
+  background: linear-gradient(135deg, #6366f1, #a855f7);
   color: #f9fafb;
   box-shadow: 0 0 18px rgba(99, 102, 241, 0.6);
   transform: translateY(-1px) scale(1.02);
@@ -350,7 +324,6 @@ body::before{
 .hero-inner{ width:min(1200px, 92vw); }
 
 .hero-badge{
-  /* баннер с текстом — сверху, по центру */
   width: clamp(320px, 70vw, 860px);
   height: auto;
   margin: 0 auto clamp(16px, 3vw, 28px);
@@ -361,19 +334,19 @@ body::before{
 
 .hero-grid{
   display: grid;
-  grid-template-columns: 1.1fr .9fr; /* чуть больше места слева под текст */
+  grid-template-columns: 1.1fr .9fr;
   gap: clamp(16px, 4vw, 40px);
   align-items: center;
 }
 
+/* OPTIMIZATION: Removed backdrop-filter */
 .hero-left{
   margin-top: 0;
   text-align: center;
   padding: clamp(8px, 1vw, 12px);
-  background: linear-gradient(180deg, rgba(20,20,24,.45), rgba(20,20,24,.20));
+  background: linear-gradient(180deg, rgba(20,20,24,.8), rgba(20,20,24,.6));
   border: 1px solid rgba(255,200,110,.10);
   border-radius: 18px;
-  backdrop-filter: blur(6px);
   box-shadow: 0 6px 30px rgba(0,0,0,.25);
 }
 
@@ -388,13 +361,12 @@ body::before{
     drop-shadow(0 10px 24px rgba(0,0,0,.45))
     drop-shadow(0 0 14px rgba(255,190,0,.20));
   animation: float 4.5s ease-in-out infinite;
+  will-change: transform;
 }
 
-/* заголовок/подзаголовок компактнее */
 .title{ font-size: clamp(28px, 4vw, 44px); margin: 10px 0 8px; }
 .subtitle{ opacity:.9; margin:0 0 14px; }
 
-/* адаптив: на планшете/мобиле — в колонку, центр */
 @media (max-width: 900px){
   .hero{ min-height: 76svh; }
   .hero-grid{ grid-template-columns: 1fr; }
@@ -403,21 +375,17 @@ body::before{
   .hero-cup{ width: clamp(200px, 48vw, 300px); }
 }
 
-/* очень широкие экраны: чуть увеличим баннер, но удержим композицию */
 @media (min-width: 1400px){
   .hero{ min-height: 74svh; }
   .hero-badge{ width: 880px; }
 }
 
-/* анимации */
-@keyframes float { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-6px)} }
-@keyframes hueflow { 0%,100%{ background-position:0% 50% } 50%{ background-position:100% 50% } }
 
 .mute-btn{
   position:fixed;bottom:16px;right:16px;
-  background:rgba(20,20,24,.6);color:#ffd36e;
+  background:rgba(20,20,24,.9);color:#ffd36e; /* Increased opacity */
   border:none;border-radius:50%;width:44px;height:44px;
-  font-size:20px;cursor:pointer;backdrop-filter:blur(4px);
+  font-size:20px;cursor:pointer;
   transition:opacity .2s;
 }
 .mute-btn:hover{opacity:.8;}
@@ -442,11 +410,9 @@ body::before{
   margin: 22px auto 10px;
 }
 
-/* Трохи щільніше верхню зону голосування */
 .section-title.center { margin-bottom: 16px; }
 .main-cats { margin: 8px auto 28px; }
 
-/* Підрівняємо “Другие номинации” */
 .small-cats { max-width: 780px; gap: 12px; }
 .cat-btn { padding: 12px 14px; border-radius: 12px; } 
 
@@ -457,16 +423,16 @@ body::before{
   justify-content:center;
   min-width:180px;
 }
+
+/* OPTIMIZATION: Removed backdrop-filter */
 .profile-pill {
   display:flex;
   align-items:center;
   gap:8px;
   padding:6px 14px;
   border-radius:999px;
-  background:rgba(20,20,24,.65);
+  background:rgba(20,20,24,.95);
   border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(12px) saturate(140%);
-  -webkit-backdrop-filter:blur(12px) saturate(140%);
   box-shadow:0 10px 30px rgba(0,0,0,.45);
   font-size:14px;
   color:var(--text);
@@ -535,6 +501,7 @@ body::before{
   opacity: .9;
 }
 
+
 /* --- Winners Page Styles --- */
 
 .winners-section {
@@ -556,7 +523,7 @@ body::before{
   margin-bottom: 10px;
 }
 
-/* Main Categories (Upper Side) */
+/* Main Categories */
 .main-winners-grid {
   display: flex;
   justify-content: center;
@@ -567,7 +534,7 @@ body::before{
 }
 
 .winner-card.main-card {
-  background: linear-gradient(180deg, rgba(25,20,15,0.9), rgba(15,15,20,0.95));
+  background: linear-gradient(180deg, rgba(25,20,15,0.95), rgba(15,15,20,0.98));
   border: 1px solid var(--gold);
   border-radius: 24px;
   padding: 40px 30px;
@@ -601,7 +568,7 @@ body::before{
 .winner-photo-wrapper {
   width: 200px;
   height: 200px;
-  padding: 6px; /* spacing for border */
+  padding: 6px;
   background: linear-gradient(135deg, var(--gold), var(--gold-2));
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   margin-bottom: 24px;
@@ -611,7 +578,7 @@ body::before{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border: 4px solid #141418; /* match inner bg */
+  border: 4px solid #141418;
 }
 
 .winner-name {
@@ -630,8 +597,9 @@ body::before{
   max-width: 900px;
 }
 
+/* OPTIMIZATION: Removed backdrop-filter */
 .podium-card {
-  background: rgba(30,30,35,0.6);
+  background: rgba(30,30,35,0.9); /* Opaque bg */
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   padding: 16px;
@@ -639,7 +607,6 @@ body::before{
   flex-direction: column;
   align-items: center;
   transition: transform 0.2s;
-  backdrop-filter: blur(10px);
 }
 
 .podium-card:hover {
@@ -658,7 +625,7 @@ body::before{
 
 .podium-media {
   width: 100%;
-  aspect-ratio: 1 / 1; /* Square */
+  aspect-ratio: 1 / 1;
   background: #000;
   border-radius: 12px;
   overflow: hidden;
@@ -679,6 +646,10 @@ body::before{
   font-size: 40px;
   color: rgba(255,255,255,0.1);
   font-weight: 800;
+}
+
+.dimmed {
+    opacity: 0.5;
 }
 
 @media (max-width: 768px) {
