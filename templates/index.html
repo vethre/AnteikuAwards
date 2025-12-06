@@ -1,19 +1,65 @@
 {{ define "index_content" }}
-<section class="hero">
-  <div class="hero-inner">
-    <img class="hero-badge" src="/static/img/anteiku_logo.png" alt="Антейковские номинации 2025 года" />
-
-    <div class="hero-grid">
-      <div class="hero-left">
-        <h1 class="title gradient-text">Anteiku Awards 2025</h1>
-        <p class="subtitle">Встречаем окончание года. Номинации. Голосование.</p>
-        <a class="btn btn-primary btn-shine" href="/vote">Начать голосование</a>
-      </div>
-
-      <div class="hero-right">
-        <img class="hero-cup" src="/static/img/trophy.png" alt="Trophy" />
-      </div>
+<section class="winners-section">
+  <div class="container">
+    
+    <div class="winners-header">
+      <img class="hero-badge-small" src="/static/img/anteiku_logo.png" alt="Logo" />
+      <h1 class="title gradient-text">Победители Anteiku Awards 2025</h1>
+      <p class="subtitle">Итоги года подведены</p>
     </div>
+
+    <div class="main-winners-grid">
+      
+      <div class="winner-card main-card">
+        <div class="winner-category">Актив Года</div>
+        <div class="winner-photo-wrapper">
+          <img src="/static/img/winners/aktiv_goda.jpg" onerror="this.src='/static/img/unknown.png'" alt="Настя" class="winner-photo">
+        </div>
+        <div class="winner-name gradient-text">Настя</div>
+      </div>
+
+      <div class="winner-card main-card">
+        <div class="winner-category">Неактив Года</div>
+        <div class="winner-photo-wrapper">
+          <img src="/static/img/winners/neaktiv_goda.jpg" onerror="this.src='/static/img/unknown.png'" alt="Дима" class="winner-photo">
+        </div>
+        <div class="winner-name gradient-text">Дима</div>
+      </div>
+
+    </div>
+
+    <div class="podiums-grid">
+      
+      <div class="podium-card">
+        <div class="podium-title">GIF Года</div>
+        <div class="podium-media">
+           <img src="/static/img/winners/gif_goda.gif" onerror="this.src='/static/img/unknown.png'" alt="5x30">
+        </div>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-title">Трек Года</div>
+        <div class="podium-media">
+           <video src="/static/img/winners/track_goda.mp4" controls playsinline loop muted autoplay></video>
+        </div>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-title">Ава Года</div>
+        <div class="podium-media">
+           <img src="/static/img/winners/ava_goda.jpg" alt="Аватар Года">
+        </div>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-title">Мем Года</div>
+        <div class="podium-media">
+           <img src="/static/img/winners/mem_goda.jpg" alt="Кружки мацони">
+        </div>
+      </div>
+
+      </div>
+
   </div>
 </section>
 {{ end }}
